@@ -27,6 +27,32 @@ async function main() {
       },
     });
   }
+
+  let user = await prisma.user.findFirst();
+  if (!user) {
+    user = await prisma.user.create({
+      data: {
+        email: 'mel@teste.com.br',
+        password: '$2a$10$Q8',
+      },
+    });
+  }
+
+  let enrollment = await prisma.enrollment.findFirst();
+  if (!enrollment) {
+    enrollment = await prisma.enrollment.create({
+      data: {
+        name: 'Mel',
+        cpf: '12345678901',
+        birthday: '1990-01-01',
+        phone: '11999999999',
+        userId: user.id,
+        createdAt: '2021-05-01T00:00:00.000Z',
+        updatedAt: '2021-05-01T00:00:00.000Z',
+      },
+    });
+  }
+
   console.log({ event });
 }
 

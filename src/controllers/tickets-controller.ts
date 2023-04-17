@@ -4,13 +4,18 @@ import { AuthenticatedRequest } from '@/middlewares';
 import ticketsService from '@/services/tickets-service';
 
 export async function postCreateNewTicket(req: AuthenticatedRequest, res: Response) {
-  const ticketTypeId = req.body.ticketTypeId;
+  const ticketTypeId = req.body.ticketTypeId as number;
+  const { userId } = req;
 
   try {
-    await ticketsService.createNewTicket(ticketTypeId);
+    const newTicket = await ticketsService.createNewTicket(ticketTypeId, userId);
 
-    return res.status(httpStatus.CREATED);
+    return res.status(httpStatus.CREATED).send({ newTicket });
   } catch (error) {
+    if (error.name === 'NotFoundError') {
+      return res.status(httpStatus.NOT_FOUND);
+    }
+
     return res.status(httpStatus.BAD_REQUEST);
   }
 }
@@ -28,10 +33,10 @@ export async function getTicketsTypes(req: AuthenticatedRequest, res: Response) 
 export async function getUserTickets(req: AuthenticatedRequest, res: Response) {
   const { userId } = req;
   try {
-    const enrollmentWithAddress = 'null';
+    const userTickets = await ticketsService.getUserTickets(userId);
 
-    return res.status(httpStatus.OK).json(enrollmentWithAddress);
+    return res.status(httpStatus.OK).json(userTickets);
   } catch (error) {
-    return res.status(httpStatus.NO_CONTENT);
+    return res.status(httpStatus.NOT_FOUND);
   }
 }
